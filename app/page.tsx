@@ -3,8 +3,23 @@ import Link from "next/link";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import Footer from "./components/Footer";
+import AuthorProfile from "./components/AuthorProfile";  // ← 追加！
 
 export const revalidate = 60;
+
+// 著者データ取得
+async function getAuthor() {
+  return await client.fetch(`
+    *[_type == "author"][0]{
+      name,
+      role,
+      bio,
+      image,
+      xUrl,
+      youtubeUrl
+    }
+  `);
+}
 
 // 型定義
 interface Post {
@@ -26,9 +41,10 @@ async function getLatestPosts() {
 
 export default async function Home() {
   const posts: Post[] = await getLatestPosts();
+  const author = await getAuthor();  // ← 追加！
 
   return (
-    <main className="min-h-screen px-6 py-16 flex flex-col items-center bg-[#f7f6f2]">
+    <main className="min-h-screen px-6 pt-16 pb-2 flex flex-col items-center bg-[#f7f6f2]">
 
       {/* ロゴ（大きめ） */}
       <Image
@@ -48,7 +64,6 @@ export default async function Home() {
 
       {/* 2つの入り口（サイズ大きめ） */}
       <div className="flex flex-col md:flex-row gap-12 mb-24">
-
         {/* こびとのにわ */}
         <Link
           href="/niwa"
@@ -84,14 +99,12 @@ export default async function Home() {
             ゆるい活動記録。
           </p>
         </Link>
-
       </div>
 
       {/* 最近のブログ */}
       <h3 className="text-2xl font-bold text-[#4a6b34] mb-8">最近のブログ</h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl w-full px-4">
-
         {posts.map((post: Post) => (
           <Link
             key={post.slug.current}
@@ -116,6 +129,10 @@ export default async function Home() {
         ))}
       </div>
 
+      {/* 🔥 プロフィールをここに表示 */}
+      <div className="mt-24 mb-6 w-full flex justify-center">
+        <AuthorProfile author={author} />
+      </div>
     </main>
   );
 }
