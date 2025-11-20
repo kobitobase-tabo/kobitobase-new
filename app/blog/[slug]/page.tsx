@@ -87,7 +87,13 @@ async function getPost(slug: string) {
         mainImage,
         body,
         publishedAt,
-        category,
+        
+        // 🔥 参照展開（これが超重要）
+        category->{
+          title,
+          "slug": slug.current
+        },
+
         author->{
           name,
           role,
@@ -101,6 +107,7 @@ async function getPost(slug: string) {
     { slug }
   );
 }
+
 
 // -----------------------------------
 // ページ本体
@@ -126,17 +133,23 @@ export default async function BlogPost({
   <a href="/blog" className="hover:underline">📝 ブログ</a>
   <span>&gt;</span>
 
-  {post.category === "robot" ? (
-    <>
-      <a href="/kobitolab" className="hover:underline">🤖 ロボット相撲</a>
-      <span>&gt;</span>
-    </>
-  ) : (
-    <>
-      <a href="/niwa" className="hover:underline">🌿 ガーデニング</a>
-      <span>&gt;</span>
-    </>
-  )}
+  {post.category?.slug === "robot" ? (
+  <>
+    <a href="/kobitolab" className="hover:underline">🤖 ロボット相撲</a>
+    <span>&gt;</span>
+  </>
+) : post.category?.slug === "other" ? (
+  <>
+    <a href="/blog" className="hover:underline">📁 その他</a>
+    <span>&gt;</span>
+  </>
+) : (
+  <>
+    <a href="/niwa" className="hover:underline">🌿 ガーデニング</a>
+    <span>&gt;</span>
+  </>
+)}
+
 
   {/* 現在ページ */}
   <span className="text-gray-700 font-medium">{post.title}</span>

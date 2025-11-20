@@ -6,6 +6,7 @@ export const postType = defineType({
   title: 'Post',
   type: 'document',
   icon: DocumentTextIcon,
+
   fields: [
     defineField({
       name: 'title',
@@ -13,6 +14,7 @@ export const postType = defineType({
       type: 'string',
       validation: (Rule) => Rule.required(),
     }),
+
     defineField({
       name: 'slug',
       title: 'スラッグ',
@@ -22,6 +24,7 @@ export const postType = defineType({
       },
       validation: (Rule) => Rule.required(),
     }),
+
     defineField({
       name: 'author',
       title: '著者',
@@ -29,19 +32,12 @@ export const postType = defineType({
       to: { type: 'author' },
     }),
 
-    // 🔥 ここを単一カテゴリのドロップダウンに変更
+    // ✅ 正しい category（reference 型）
     defineField({
       name: 'category',
       title: 'カテゴリー',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Garden（こびとのにわ）', value: 'garden' },
-          { title: 'Robot（KOBITO LAB）', value: 'robot' },
-          { title: 'Others（その他）', value: 'others' },
-        ],
-        layout: 'dropdown',
-      },
+      type: 'reference',
+      to: [{ type: 'category' }],
       validation: (Rule) => Rule.required(),
     }),
 
@@ -77,15 +73,14 @@ export const postType = defineType({
       title: 'title',
       author: 'author.name',
       media: 'mainImage',
-      category: 'category',
+      category: 'category.title', // ← category のタイトルを取得
     },
     prepare({ title, author, media, category }) {
       return {
         title,
         media,
-        subtitle: `${author ? `by ${author}` : ''}  ${category ? `| ${category}` : ''}`,
+        subtitle: `${author ? `by ${author}` : ''} ${category ? `| ${category}` : ''}`,
       }
     },
   },
 })
-

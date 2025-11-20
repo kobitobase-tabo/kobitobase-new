@@ -17,12 +17,15 @@ interface Post {
 // robot カテゴリーの記事だけ取得
 async function getRobotPosts() {
   return await client.fetch(`
-    *[_type == "post" && category == "robot"] 
+    *[_type == "post" && category->slug.current == "robot"]
       | order(_createdAt desc) {
         title,
         slug,
         mainImage,
-        category
+        category->{
+          title,
+          "slug": slug.current
+        }
       }
   `);
 }

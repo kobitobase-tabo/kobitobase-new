@@ -14,18 +14,22 @@ interface Post {
   category?: string;
 }
 
-// "garden" カテゴリーの記事だけ取得
+// "garden" カテゴリーの記事だけ取得（修正版）
 async function getGardenPosts() {
   return await client.fetch(`
-    *[_type == "post" && category == "garden"] 
+    *[_type == "post" && category->slug.current == "garden"]
       | order(_createdAt desc) {
         title,
         slug,
         mainImage,
-        category
+        category->{
+          title,
+          "slug": slug.current
+        }
       }
   `);
 }
+
 
 export default async function NiwaPage() {
   const posts: Post[] = await getGardenPosts();
