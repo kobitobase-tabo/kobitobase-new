@@ -55,6 +55,24 @@ export const blockContentType = defineType({
     }),
 
     // -------------------------
+    // ★ X（Twitter） 埋め込み Block
+    // -------------------------
+    defineArrayMember({
+      name: 'twitter',
+      type: 'object',
+      title: 'Twitter Embed',
+      fields: [
+        {
+          name: 'url',
+          type: 'url',
+          title: 'Tweet URL',
+          description: 'Tweet の URL を貼ってください',
+          validation: (Rule) => Rule.required(),
+        },
+      ],
+    }),
+
+    // -------------------------
     // 画像 Block
     // -------------------------
     defineArrayMember({

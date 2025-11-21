@@ -20,23 +20,20 @@ interface Post {
 }
 
 // -----------------------------------
-// 🔥 YouTube 対応 PortableText Renderer
+// 🔥 YouTube ＆ Twitter 対応 PortableText Renderer
 // -----------------------------------
 const portableTextComponents = {
   types: {
+    // YouTube embed
     youtube: ({ value }: any) => {
       const url = value?.url;
       if (!url) return null;
 
-      // YouTube 用 embed URL 作成
       let embedUrl = url;
 
-      // youtu.be/xxxx → youtube.com/embed/xxxx
       if (url.includes("youtu.be")) {
         embedUrl = url.replace("youtu.be/", "www.youtube.com/embed/");
       }
-
-      // watch?v=xxxx → embed/xxxx
       if (url.includes("watch?v=")) {
         embedUrl = url.replace("watch?v=", "embed/");
       }
@@ -53,7 +50,25 @@ const portableTextComponents = {
         </div>
       );
     },
+
+    // Twitter embed 🔥
+    twitter: ({ value }: any) => {
+      const url = value?.url;
+      if (!url) return null;
+
+      return (
+        <div className="my-8">
+          <blockquote className="twitter-tweet">
+            <a href={url}></a>
+          </blockquote>
+
+          {/* Twitter公式ウィジェット読み込み */}
+          <script async src="https://platform.twitter.com/widgets.js"></script>
+        </div>
+      );
+    },
   },
+
   block: {
     normal: ({ children }: any) => (
       <p className="text-base leading-relaxed my-4">{children}</p>
