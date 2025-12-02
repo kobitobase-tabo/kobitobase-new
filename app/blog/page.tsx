@@ -1,31 +1,37 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 
-export const revalidate = 60;
 
-// ---------- 型定義 ----------
-
-interface SanityImage {
-  [key: string]: unknown;
+// ===============================
+// 🔧 Post 型（any を使わない）
+// ===============================
+interface Category {
+  title?: string;
+  slug?: string;
 }
 
-interface BlogListPost {
+interface Post {
   title: string;
   slug: { current: string };
-  mainImage?: SanityImage | null;
-  category?: {
-    title?: string;
-    slug?: string;
-  };
+  mainImage?: {
+    asset?: {
+      _ref?: string;
+      _type?: string;
+    };
+  } | null;
+  category?: Category | null;
 }
 
-// ---------- データ取得 ----------
-
-async function getAllPosts(): Promise<BlogListPost[]> {
-  return await client.fetch(
-    `
+// ------------------------------
+//  全記事取得
+// ------------------------------
+async function getAllPosts(): Promise<Post[]> {
+  return await client.fetch(`
     *[_type == "post"]
       | order(_createdAt desc) {
         title,
@@ -36,48 +42,98 @@ async function getAllPosts(): Promise<BlogListPost[]> {
           "slug": slug.current
         }
       }
-  `
-  );
+  `);
 }
 
-// ---------- カテゴリー表示 ----------
+export default function BlogPageWrapper() {
+  const [posts, setPosts] = useState<Post[] | null>(null);
 
-function getCategoryLabel(category?: { slug?: string }): string {
-  const slug = category?.slug;
+  // 初回ロードで記事取得
+  useEffect(() => {
+    getAllPosts().then((res) => setPosts(res));
+  }, []);
 
-  switch (slug) {
-    case "robot":
-      return "🤖 ロボット相撲";
-    case "other":
-      return "📁 その他";
-    case "garden":
-    default:
-      return "🌿 ガーデニング";
+  if (!posts) {
+    return (
+      <main className="min-h-screen px-6 py-20 flex flex-col items-center">
+        <p className="text-gray-500">読み込み中...</p>
+      </main>
+    );
   }
+
+  return <BlogPage posts={posts} />;
 }
 
-// ---------- ページ本体 ----------
+// ------------------------------
+//  表示 UI
+// ------------------------------
+function BlogPage({ posts }: { posts: Post[] }) {
+  const [category, setCategory] = useState<"all" | "garden" | "robot" | "other">(
+    "all"
+  );
 
-export default async function BlogPage() {
-  const posts = await getAllPosts();
+  // カテゴリでフィルタ
+  const filteredPosts = posts.filter((post) => {
+    if (category === "all") return true;
+    return post.category?.slug === category;
+  });
 
   return (
     <main className="min-h-screen px-6 py-20 bg-[#f7f6f2] flex flex-col items-center">
+      <h1 className="text-3xl font-bold text-[#4a6b34] mb-8">ブログ一覧</h1>
 
-      <h1 className="text-3xl font-bold text-[#4a6b34] mb-10">
-        ブログ一覧
-      </h1>
+      {/* カテゴリ切替ボタン */}
+      <div className="flex gap-4 mb-12 flex-wrap justify-center">
 
+        <button
+          onClick={() => setCategory("all")}
+          className={`px-4 py-2 rounded-full border transition ${
+            category === "all"
+              ? "bg-green-600 text-white border-green-600"
+              : "bg-white text-gray-700"
+          }`}
+        >
+          🔄 すべて
+        </button>
+
+        <button
+          onClick={() => setCategory("garden")}
+          className={`px-4 py-2 rounded-full border transition ${
+            category === "garden"
+              ? "bg-green-600 text-white border-green-600"
+              : "bg-white text-gray-700"
+          }`}
+        >
+          🌿 にわ
+        </button>
+
+        <button
+          onClick={() => setCategory("robot")}
+          className={`px-4 py-2 rounded-full border transition ${
+            category === "robot"
+              ? "bg-green-600 text-white border-green-600"
+              : "bg-white text-gray-700"
+          }`}
+        >
+          🤖 LAB
+        </button>
+
+        <button
+          onClick={() => setCategory("other")}
+          className={`px-4 py-2 rounded-full border transition ${
+            category === "other"
+              ? "bg-green-600 text-white border-green-600"
+              : "bg-white text-gray-700"
+          }`}
+        >
+          📁 その他
+        </button>
+      </div>
+
+      {/* 記事一覧 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl w-full">
-
-        {posts.map((post) => (
+        {filteredPosts.map((post) => (
           <div key={post.slug.current}>
-            {/* DEBUG */}
-            {(() => {
-              console.log("DEBUG CATEGORY:", post.title, post.category);
-              return null;
-            })()}
-
             <Link
               href={`/blog/${post.slug.current}`}
               className="bg-white rounded-3xl shadow-md hover:shadow-xl transition overflow-hidden group block"
@@ -97,17 +153,20 @@ export default async function BlogPage() {
                   {post.title}
                 </h2>
 
-                {/* カテゴリー表示 */}
                 <p className="text-sm text-gray-500 mt-2">
-                  {getCategoryLabel(post.category)}
+                  {post.category?.slug === "robot"
+                    ? "🤖 ロボット相撲"
+                    : post.category?.slug === "garden"
+                    ? "🌿 ガーデニング"
+                    : post.category?.slug === "other"
+                    ? "📁 その他"
+                    : "📄 未分類"}
                 </p>
               </div>
             </Link>
           </div>
         ))}
-
       </div>
-
     </main>
   );
 }
