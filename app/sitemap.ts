@@ -1,21 +1,31 @@
 import { client } from "@/sanity/lib/client";
 import { MetadataRoute } from "next";
 
-// Sanityから全ブログ記事を取得
-async function getBlogPosts() {
-  return await client.fetch(`
+// ------ 型定義 ------
+interface BlogPostForSitemap {
+  slug: string;
+  _updatedAt?: string; // ISO date string
+  category?: unknown;  // category は sitemap では使わないので簡易でOK
+}
+
+// ------ Sanity から取得 ------
+async function getBlogPosts(): Promise<BlogPostForSitemap[]> {
+  return await client.fetch(
+    `
     *[_type == "post"]{
       "slug": slug.current,
       _updatedAt,
       category
     }
-  `);
+  `
+  );
 }
 
+// ------ サイトマップ生成 ------
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://kobitobase.com"; // ← KOBITO BASE のURL
+  const baseUrl = "https://kobitobase.com";
 
-  // --- 固定ページ ---
+  // 固定ページ
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/`,
@@ -43,14 +53,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // --- Sanityのブログ記事（全て） ---
+  // ブログ記事
   const posts = await getBlogPosts();
-  const blogPages: MetadataRoute.Sitemap = posts.map((post: any) => ({
+
+  const blogPages: MetadataRoute.Sitemap = posts.map((post) => ({
     url: `${baseUrl}/blog/${post.slug}`,
-    lastModified: post._updatedAt || new Date(),
+    lastModified: post._updatedAt ? new Date(post._updatedAt) : new Date(),
     changeFrequency: "monthly",
     priority: 0.7,
   }));
 
   return [...staticPages, ...blogPages];
 }
+

@@ -6,17 +6,27 @@ import GardenVideoSlider from "../components/GardenVideoSlider";
 
 export const revalidate = 60;
 
-// 型定義
+// ---------- 型定義 ----------
+interface SanityImage {
+  [key: string]: unknown;
+}
+
+interface Category {
+  title?: string;
+  slug?: string;
+}
+
 interface Post {
   title: string;
   slug: { current: string };
-  mainImage?: any;
-  category?: string;
+  mainImage?: SanityImage | null;
+  category?: Category;
 }
 
-// "garden" カテゴリーの記事だけ取得（修正版）
-async function getGardenPosts() {
-  return await client.fetch(`
+// ---------- データ取得 ----------
+async function getGardenPosts(): Promise<Post[]> {
+  return await client.fetch(
+    `
     *[_type == "post" && category->slug.current == "garden"]
       | order(_createdAt desc) {
         title,
@@ -27,12 +37,13 @@ async function getGardenPosts() {
           "slug": slug.current
         }
       }
-  `);
+  `
+  );
 }
 
-
+// ---------- ページ本体 ----------
 export default async function NiwaPage() {
-  const posts: Post[] = await getGardenPosts();
+  const posts = await getGardenPosts();
 
   return (
     <main className="min-h-screen px-6 py-16 flex flex-col items-center bg-[#f7f6f2]">
@@ -54,13 +65,15 @@ export default async function NiwaPage() {
 
       {/* 説明文 */}
       <p className="text-gray-600 text-center max-w-2xl leading-relaxed mb-16">
-        こびとのにわでは、植物との暮らしを中心に、<br />日々のちょっとした工夫や気づきを発信しています。<br />
-        初心者でも楽しめるガーデニングのコツや、季節ごとの庭の変化など、<br />ゆっくり楽しんでいただける内容をお届けします。
+        こびとのにわでは、植物との暮らしを中心に、<br />
+        日々のちょっとした工夫や気づきを発信しています。<br />
+        初心者でも楽しめるガーデニングのコツや、季節ごとの庭の変化など、<br />
+        ゆっくり楽しんでいただける内容をお届けします。
       </p>
 
       {/* 記事一覧 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl w-full">
-        {posts.map((post: Post) => (
+        {posts.map((post) => (
           <Link
             key={post.slug.current}
             href={`/blog/${post.slug.current}`}
@@ -83,7 +96,9 @@ export default async function NiwaPage() {
           </Link>
         ))}
       </div>
-    <GardenVideoSlider />
+
+      {/* 動画スライダー */}
+      <GardenVideoSlider />
     </main>
   );
 }

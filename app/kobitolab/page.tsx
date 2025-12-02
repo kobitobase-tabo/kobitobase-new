@@ -6,17 +6,29 @@ import LabVideoSlider from "../components/LabVideoSlider";
 
 export const revalidate = 60;
 
-// 型定義
+// ---------- 型定義 ----------
+
+interface SanityImage {
+  [key: string]: unknown;
+}
+
+interface Category {
+  title?: string;
+  slug?: string;
+}
+
 interface Post {
   title: string;
   slug: { current: string };
-  mainImage?: any;
-  category?: string;
+  mainImage?: SanityImage | null;
+  category?: Category;
 }
 
-// robot カテゴリーの記事だけ取得
-async function getRobotPosts() {
-  return await client.fetch(`
+// ---------- データ取得 ----------
+
+async function getRobotPosts(): Promise<Post[]> {
+  return await client.fetch(
+    `
     *[_type == "post" && category->slug.current == "robot"]
       | order(_createdAt desc) {
         title,
@@ -27,11 +39,14 @@ async function getRobotPosts() {
           "slug": slug.current
         }
       }
-  `);
+  `
+  );
 }
 
+// ---------- ページ本体 ----------
+
 export default async function KobitoLabPage() {
-  const posts: Post[] = await getRobotPosts();
+  const posts = await getRobotPosts();
 
   return (
     <main className="min-h-screen px-6 py-20 flex flex-col items-center bg-[#f7f6f2]">
@@ -60,7 +75,7 @@ export default async function KobitoLabPage() {
       {/* 記事一覧 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl w-full">
 
-        {posts.map((post: Post) => (
+        {posts.map((post) => (
           <Link
             key={post.slug.current}
             href={`/blog/${post.slug.current}`}
@@ -75,6 +90,7 @@ export default async function KobitoLabPage() {
                 className="w-full h-64 object-cover group-hover:scale-[1.03] transition duration-300"
               />
             )}
+
             <div className="p-6">
               <h4 className="text-xl font-semibold text-[#4a6b34] leading-snug">
                 {post.title}
@@ -84,57 +100,45 @@ export default async function KobitoLabPage() {
         ))}
 
       </div>
-    <LabVideoSlider />
 
-    {/* ロボット紹介セクション */}
-<section className="w-full max-w-5xl mt-20 px-4">
-  <h2 className="text-2xl md:text-3xl font-bold text-center text-[#4a6b34] mb-10">
-    🤖 ロボット紹介
-  </h2>
+      {/* 動画スライダー */}
+      <LabVideoSlider />
 
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+      {/* ロボット紹介セクション */}
+      <section className="w-full max-w-5xl mt-20 px-4">
+        <h2 className="text-2xl md:text-3xl font-bold text-center text-[#4a6b34] mb-10">
+          🤖 ロボット紹介
+        </h2>
 
-    {/* ロボット i（画像つき） */}
-    <a
-      href="/kobitolab/robot/i"
-      className="bg-white rounded-3xl shadow-md hover:shadow-xl transition block overflow-hidden"
-    >
-      {/* サムネ画像 */}
-      <img
-        src="/robots/i.jpg"         // ← ここに画像を置く
-        alt="ロボット i"
-        className="w-full h-56 object-cover"
-      />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
-      <div className="p-6">
-        <h3 className="text-xl font-semibold text-[#4a6b34] mb-3">
-          しこ名：i（アイ）
-        </h3>
+          {/* ロボット i */}
+          <Link
+            href="/kobitolab/robot/i"
+            className="bg-white rounded-3xl shadow-md hover:shadow-xl transition block overflow-hidden"
+          >
+            <img
+              src="/robots/i.jpg"
+              alt="ロボット i"
+              className="w-full h-56 object-cover"
+            />
 
-        <p className="text-gray-600 leading-relaxed">
-          KOBITO LABの初号機（2025年）。<br />
-          Ikedo Mini Sumo Robot V2をベースに、3Dプリンターで各パーツを改良。タイヤはシリコーンゴムで自作。<br />
-        </p>
-      </div>
-    </a>
+            <div className="p-6">
+              <h3 className="text-xl font-semibold text-[#4a6b34] mb-3">
+                しこ名：i（アイ）
+              </h3>
 
-    {/* ロボットが増えた時はここに追加 */}
-    {/* 例：
-    <a
-      href="/kobitolab/robot/y"
-      className="bg-white rounded-3xl shadow-md p-6 hover:shadow-xl transition block"
-    >
-      <h3 className="text-xl font-semibold text-[#4a6b34] mb-3">しこ名：〇〇</h3>
-      <p className="text-gray-600 leading-relaxed">
-        ロボットの説明文…
-      </p>
-    </a>
-    */}
+              <p className="text-gray-600 leading-relaxed">
+                KOBITO LABの初号機（2025年）。<br />
+                Ikedo Mini Sumo Robot V2をベースに、3Dプリンターで各パーツを改良。
+                タイヤはシリコーンゴムで自作。<br />
+              </p>
+            </div>
+          </Link>
 
-  </div>
-</section>
+        </div>
+      </section>
 
     </main>
   );
 }
-

@@ -1,7 +1,22 @@
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
 
-export default function AuthorProfile({ author }: { author: any }) {
+// ---------- 型定義 ----------
+interface SanityImage {
+  [key: string]: unknown;
+}
+
+interface Author {
+  name?: string;
+  image?: SanityImage | null;
+  role?: string;
+  bio?: string;
+  xUrl?: string;
+  youtubeUrl?: string;
+}
+
+// ---------- コンポーネント ----------
+export default function AuthorProfile({ author }: { author?: Author }) {
   if (!author) return null;
 
   return (
@@ -13,7 +28,7 @@ export default function AuthorProfile({ author }: { author: any }) {
           {author.image && (
             <Image
               src={urlFor(author.image).width(120).height(120).url()}
-              alt={author.name}
+              alt={author.name ?? "author"}
               width={80}
               height={80}
               className="rounded-full border"
@@ -38,10 +53,11 @@ export default function AuthorProfile({ author }: { author: any }) {
         {/* 右：SNS */}
         <div className="md:w-1/2 flex flex-col gap-4 pt-4 md:pt-0 border-t md:border-t-0 md:pl-6">
 
-          {author?.xUrl && (
+          {author.xUrl && (
             <a
               href={author.xUrl}
               target="_blank"
+              rel="noreferrer"
               className="flex items-center gap-3 text-blue-600 font-bold text-xl hover:underline"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 24 24">
@@ -51,14 +67,15 @@ export default function AuthorProfile({ author }: { author: any }) {
             </a>
           )}
 
-          {author?.youtubeUrl && (
+          {author.youtubeUrl && (
             <a
               href={author.youtubeUrl}
               target="_blank"
+              rel="noreferrer"
               className="flex items-center gap-3 text-red-600 font-bold text-xl hover:underline"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.75 15.5v-7L15.5 12l-5.75 3.5z"/>
+                <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.75 15.5v-7L15.5 12l-5.75 3.5z" />
               </svg>
               YouTube チャンネル
             </a>

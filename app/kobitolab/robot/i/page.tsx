@@ -5,6 +5,16 @@ import Link from "next/link";
 export default function RobotDetail() {
   return (
     <main className="flex flex-col items-center bg-[#f4f4f4] min-h-screen p-8">
+
+      {/* パンくず */}
+      <nav className="text-sm text-gray-500 mb-6 self-start">
+        <Link href="/" className="hover:underline">🏡 ホーム</Link>
+        <span className="mx-1">&gt;</span>
+        <Link href="/kobitolab" className="hover:underline">🤖 KOBITO LAB</Link>
+        <span className="mx-1">&gt;</span>
+        <span className="text-[#4a6b34] font-medium">ロボット i</span>
+      </nav>
+
       <h1 className="text-3xl font-bold text-[#4a6b34] mb-6">
         しこ名「 i（アイ）」詳細データ
       </h1>
@@ -45,29 +55,17 @@ export default function RobotDetail() {
               <td className="py-2 px-3">MAKER-MSUMO</td>
             </tr>
             <tr className="border-b border-gray-200">
-              <th className="py-2 px-3 font-bold text-[#4a6b34]">Start Stop Module / スタートストップモジュール</th>
+              <th className="py-2 px-3 font-bold text-[#4a6b34]">Start Stop Module</th>
               <td className="py-2 px-3">IR Sumo Module</td>
             </tr>
             <tr>
-              <th className="py-2 px-3 font-bold text-[#4a6b34]">Battery / バッテリー</th>
+              <th className="py-2 px-3 font-bold text-[#4a6b34]">Battery</th>
               <td className="py-2 px-3">Tattu 2S 550mAh 95C</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      {/* 動画セクション */}
-      {/*<div className="mt-8 w-full max-w-2xl">
-        <h2 className="text-xl font-bold text-[#4a6b34] mb-3">動画ギャラリー</h2>
-        <video
-          src="/videos/i_test.mp4"
-          controls
-          className="w-full rounded-xl shadow-lg"
-        />
-        <p className="text-sm text-[#4a6b34] mt-2 text-center">
-          テスト走行（2025年10月） — 対戦形式の様子
-        </p>
-      </div>*/}
     </main>
   );
 }

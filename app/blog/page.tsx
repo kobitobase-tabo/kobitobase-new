@@ -5,9 +5,27 @@ import { urlFor } from "@/sanity/lib/image";
 
 export const revalidate = 60;
 
-// 全記事を取得（カテゴリ参照展開）
-async function getAllPosts() {
-  return await client.fetch(`
+// ---------- 型定義 ----------
+
+interface SanityImage {
+  [key: string]: unknown;
+}
+
+interface BlogListPost {
+  title: string;
+  slug: { current: string };
+  mainImage?: SanityImage | null;
+  category?: {
+    title?: string;
+    slug?: string;
+  };
+}
+
+// ---------- データ取得 ----------
+
+async function getAllPosts(): Promise<BlogListPost[]> {
+  return await client.fetch(
+    `
     *[_type == "post"]
       | order(_createdAt desc) {
         title,
@@ -18,13 +36,14 @@ async function getAllPosts() {
           "slug": slug.current
         }
       }
-  `);
+  `
+  );
 }
 
+// ---------- カテゴリー表示 ----------
 
-// カテゴリー表示用関数
-function getCategoryLabel(category: any) {
-  const slug = category?.slug?.current || category?.slug;
+function getCategoryLabel(category?: { slug?: string }): string {
+  const slug = category?.slug;
 
   switch (slug) {
     case "robot":
@@ -36,6 +55,8 @@ function getCategoryLabel(category: any) {
       return "🌿 ガーデニング";
   }
 }
+
+// ---------- ページ本体 ----------
 
 export default async function BlogPage() {
   const posts = await getAllPosts();
@@ -49,13 +70,13 @@ export default async function BlogPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl w-full">
 
-        {posts.map((post: any) => (
+        {posts.map((post) => (
           <div key={post.slug.current}>
             {/* DEBUG */}
-    {(() => {
-      console.log("DEBUG CATEGORY:", post.title, post.category);
-      return null;
-    })()}
+            {(() => {
+              console.log("DEBUG CATEGORY:", post.title, post.category);
+              return null;
+            })()}
 
             <Link
               href={`/blog/${post.slug.current}`}

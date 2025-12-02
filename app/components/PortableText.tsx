@@ -1,29 +1,36 @@
-import {PortableText, PortableTextComponents} from '@portabletext/react';
+import { PortableText, PortableTextComponents, PortableTextComponentProps } from "@portabletext/react";
+import type { PortableTextBlock } from "@portabletext/types";
 
+// ---------- PortableText カスタムレンダラー ----------
 const components: PortableTextComponents = {
   block: {
-    normal: ({children}) => (
-      <p className="text-base leading-relaxed my-3">{children}</p>
+    normal: (props: PortableTextComponentProps<PortableTextBlock>) => (
+      <p className="text-base leading-relaxed my-3">{props.children}</p>
     ),
 
-    h1: ({children}) => (
-      <h1 className="text-4xl font-bold my-6">{children}</h1>
+    h1: (props: PortableTextComponentProps<PortableTextBlock>) => (
+      <h1 className="text-4xl font-bold my-6">{props.children}</h1>
     ),
 
-    h2: ({children}) => (
-      <h2 className="text-3xl font-semibold my-5">{children}</h2>
+    h2: (props: PortableTextComponentProps<PortableTextBlock>) => (
+      <h2 className="text-3xl font-semibold my-5">{props.children}</h2>
     ),
 
-    h3: ({children}) => (
-      <h3 className="text-2xl font-semibold my-4">{children}</h3>
+    h3: (props: PortableTextComponentProps<PortableTextBlock>) => (
+      <h3 className="text-2xl font-semibold my-4">{props.children}</h3>
     ),
 
-    h4: ({children}) => (
-      <h4 className="text-xl font-semibold my-3">{children}</h4>
+    h4: (props: PortableTextComponentProps<PortableTextBlock>) => (
+      <h4 className="text-xl font-semibold my-3">{props.children}</h4>
     ),
   },
 };
 
-export default function MyPortableText({value}: {value: any}) {
+// ---------- コンポーネント本体 ----------
+export default function MyPortableText({
+  value,
+}: {
+  value: PortableTextBlock[];
+}) {
   return <PortableText value={value} components={components} />;
 }

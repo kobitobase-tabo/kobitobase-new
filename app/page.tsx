@@ -3,13 +3,34 @@ import Link from "next/link";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import Footer from "./components/Footer";
-import AuthorProfile from "./components/AuthorProfile";  // ← 追加！
+import AuthorProfile from "./components/AuthorProfile";
 
 export const revalidate = 60;
 
-// 著者データ取得
-async function getAuthor() {
-  return await client.fetch(`
+// ---------- 型定義 ----------
+interface SanityImage {
+  [key: string]: unknown;
+}
+
+interface Post {
+  title: string;
+  slug: { current: string };
+  mainImage?: SanityImage | null;
+}
+
+interface Author {
+  name?: string;
+  role?: string;
+  bio?: string;
+  image?: SanityImage | null;
+  xUrl?: string;
+  youtubeUrl?: string;
+}
+
+// ---------- データ取得 ----------
+async function getAuthor(): Promise<Author | null> {
+  return await client.fetch(
+    `
     *[_type == "author"][0]{
       name,
       role,
@@ -18,35 +39,32 @@ async function getAuthor() {
       xUrl,
       youtubeUrl
     }
-  `);
-}
-
-// 型定義
-interface Post {
-  title: string;
-  slug: { current: string };
-  mainImage?: any;
+  `
+  );
 }
 
 // 最新3件取得
-async function getLatestPosts() {
-  return await client.fetch(`
+async function getLatestPosts(): Promise<Post[]> {
+  return await client.fetch(
+    `
     *[_type == "post"] | order(_createdAt desc)[0...3]{
       title,
       slug,
       mainImage
     }
-  `);
+  `
+  );
 }
 
+// ---------- ページ本体 ----------
 export default async function Home() {
-  const posts: Post[] = await getLatestPosts();
-  const author = await getAuthor();  // ← 追加！
+  const posts = await getLatestPosts();
+  const author = await getAuthor();
 
   return (
     <main className="min-h-screen px-6 pt-16 pb-2 flex flex-col items-center bg-[#f7f6f2]">
 
-      {/* ロゴ（大きめ） */}
+      {/* ロゴ */}
       <Image
         src="/kobitobase_logo.png"
         alt="KOBITO BASE ロゴ"
@@ -56,15 +74,14 @@ export default async function Home() {
         priority
       />
 
-      {/* キャッチコピー（大きめ） */}
+      {/* キャッチコピー */}
       <p className="text-center text-gray-700 text-2xl md:text-3xl leading-relaxed font-light mb-20">
         小さな庭と、小さなロボットで。<br />
         日々をちょっと、おもしろく。
       </p>
 
-      {/* 2つの入り口（サイズ大きめ） */}
+      {/* 入口2つ */}
       <div className="flex flex-col md:flex-row gap-12 mb-24">
-        {/* こびとのにわ */}
         <Link
           href="/niwa"
           className="group block bg-white border border-[#dfe8db] rounded-3xl shadow-md p-10 w-80 hover:shadow-xl transition flex flex-col items-center"
@@ -82,7 +99,6 @@ export default async function Home() {
           </p>
         </Link>
 
-        {/* KOBITO LAB */}
         <Link
           href="/kobitolab"
           className="group block bg-white border border-[#dfe8db] rounded-3xl shadow-md p-10 w-80 hover:shadow-xl transition flex flex-col items-center"
@@ -105,7 +121,7 @@ export default async function Home() {
       <h3 className="text-2xl font-bold text-[#4a6b34] mb-8">最近のブログ</h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl w-full px-4">
-        {posts.map((post: Post) => (
+        {posts.map((post) => (
           <Link
             key={post.slug.current}
             href={`/blog/${post.slug.current}`}
@@ -129,10 +145,11 @@ export default async function Home() {
         ))}
       </div>
 
-      {/* 🔥 プロフィールをここに表示 */}
+      {/* 📌 プロフィール */}
       <div className="mt-24 mb-6 w-full flex justify-center">
-        <AuthorProfile author={author} />
+        <AuthorProfile author={author ?? undefined} />
       </div>
+
     </main>
   );
 }
