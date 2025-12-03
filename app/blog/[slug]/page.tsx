@@ -3,16 +3,12 @@ import Link from "next/link";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import { PortableText } from "@portabletext/react";
-import type {
-  PortableTextComponents,
-  PortableTextComponentProps,
-} from "@portabletext/react";
+import type { PortableTextComponents } from "@portabletext/react";
 import type { PortableTextBlock } from "@portabletext/types";
-import React from "react";
 
-// ========== 型定義 ==========
-
-// Sanity 画像用（any を使わない）
+// ===============================
+// 型定義
+// ===============================
 interface SanityImage {
   [key: string]: unknown;
 }
@@ -35,27 +31,26 @@ interface Post {
   title: string;
   slug: { current: string };
   mainImage?: SanityImage | null;
-  body: PortableTextBlock[]; // ← ここが重要！
+  body: PortableTextBlock[];
   publishedAt?: string;
-  author?: Author;
-  category?: Category;
+  category?: Category | null;
+  author?: Author | null;
 }
 
-// ========== PortableText Renderer ==========
-
+// ===============================
+// PortableText renderer
+// ===============================
 const portableTextComponents: PortableTextComponents = {
   types: {
     youtube: ({ value }: { value: { url?: string } }) => {
-      const url = value?.url;
-      if (!url) return null;
+      if (!value?.url) return null;
 
-      let embedUrl = url;
-
-      if (url.includes("youtu.be")) {
-        embedUrl = url.replace("youtu.be/", "www.youtube.com/embed/");
+      let embedUrl = value.url;
+      if (embedUrl.includes("youtu.be")) {
+        embedUrl = embedUrl.replace("youtu.be/", "www.youtube.com/embed/");
       }
-      if (url.includes("watch?v=")) {
-        embedUrl = url.replace("watch?v=", "embed/");
+      if (embedUrl.includes("watch?v=")) {
+        embedUrl = embedUrl.replace("watch?v=", "embed/");
       }
 
       return (
@@ -72,13 +67,12 @@ const portableTextComponents: PortableTextComponents = {
     },
 
     twitter: ({ value }: { value: { url?: string } }) => {
-      const url = value?.url;
-      if (!url) return null;
+      if (!value?.url) return null;
 
       return (
         <div className="my-8">
           <blockquote className="twitter-tweet">
-            <a href={url}></a>
+            <a href={value.url}></a>
           </blockquote>
           <script async src="https://platform.twitter.com/widgets.js"></script>
         </div>
@@ -87,82 +81,75 @@ const portableTextComponents: PortableTextComponents = {
   },
 
   block: {
-    normal: (
-      props: PortableTextComponentProps<PortableTextBlock>,
-    ) => (
-      <p className="text-base leading-relaxed my-4">
-        {props.children}
-      </p>
+    normal: ({ children }) => (
+      <p className="text-base leading-relaxed my-4">{children}</p>
     ),
-
-    h1: (props: PortableTextComponentProps<PortableTextBlock>) => (
-      <h1 className="text-4xl font-bold my-6">
-        {props.children}
-      </h1>
+    h1: ({ children }) => (
+      <h1 className="text-4xl font-bold my-6">{children}</h1>
     ),
-
-    h2: (props: PortableTextComponentProps<PortableTextBlock>) => (
-      <h2 className="text-3xl font-semibold my-5">
-        {props.children}
-      </h2>
+    h2: ({ children }) => (
+      <h2 className="text-3xl font-semibold my-5">{children}</h2>
     ),
-
-    h3: (props: PortableTextComponentProps<PortableTextBlock>) => (
-      <h3 className="text-2xl font-semibold my-4">
-        {props.children}
-      </h3>
+    h3: ({ children }) => (
+      <h3 className="text-2xl font-semibold my-4">{children}</h3>
     ),
-
-    h4: (props: PortableTextComponentProps<PortableTextBlock>) => (
-      <h4 className="text-xl font-semibold my-3">
-        {props.children}
-      </h4>
+    h4: ({ children }) => (
+      <h4 className="text-xl font-semibold my-3">{children}</h4>
     ),
   },
 };
 
-// ========== 記事取得 ==========
-
+// ===============================
+// 記事取得
+// ===============================
 async function getPost(slug: string): Promise<Post | null> {
-  if (!slug) return null;
-
   return await client.fetch(
-    `*[_type == "post" && slug.current == $slug][0]{
-      title,
-      slug,
-      mainImage,
-      body,
-      publishedAt,
-      category->{
+    `
+      *[_type == "post" && slug.current == $slug][0]{
         title,
-        "slug": slug.current
-      },
-      author->{
-        name,
-        role,
-        bio,
-        image,
-        xUrl,
-        youtubeUrl
+        slug,
+        mainImage,
+        body,
+        publishedAt,
+
+        category->{
+          title,
+          "slug": slug.current
+        },
+
+        author->{
+          name,
+          role,
+          bio,
+          image,
+          xUrl,
+          youtubeUrl
+        }
       }
-    }`,
-    { slug }
+    `,
+    { slug: slug }
   );
 }
 
-
-// ========== ページ本体 ==========
-
-export default async function BlogPost({
+// ===============================
+// ページ（Next.js 正しい形式）
+// ===============================
+export default async function Page({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const { slug } = params;
+
+  const { slug } = await params;  // ← Promise を await する！！
+
+  console.log("DEBUG slug:", slug);
 
   const post = await getPost(slug);
-  if (!post) return <p>記事が見つかりませんでした。</p>;
 
+  if (!post) {
+    return <p className="p-10">記事が見つかりませんでした。</p>;
+  }
+  
   return (
     <main className="max-w-3xl mx-auto px-6 py-16 leading-relaxed text-gray-800">
       {/* パンくず */}
@@ -200,9 +187,7 @@ export default async function BlogPost({
           </>
         )}
 
-        <span className="text-gray-700 font-medium">
-          {post.title}
-        </span>
+        <span className="text-gray-700 font-medium">{post.title}</span>
       </nav>
 
       {/* タイトル */}
@@ -228,10 +213,7 @@ export default async function BlogPost({
 
       {/* 本文 */}
       <article className="prose prose-lg prose-neutral max-w-none">
-        <PortableText
-          value={post.body}
-          components={portableTextComponents}
-        />
+        <PortableText value={post.body} components={portableTextComponents} />
       </article>
 
       <hr className="my-12" />
@@ -253,9 +235,7 @@ export default async function BlogPost({
               )}
 
               <div>
-                <h3 className="text-lg font-bold">
-                  {post.author.name}
-                </h3>
+                <h3 className="text-lg font-bold">{post.author.name}</h3>
                 <p className="text-sm text-gray-500 mb-2">
                   {post.author.role ?? "KOBITO LAB 運営"}
                 </p>
@@ -274,15 +254,6 @@ export default async function BlogPost({
                   rel="noreferrer"
                   className="flex items-center gap-3 text-blue-600 font-bold text-xl hover:underline"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="28"
-                    height="28"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M18.146 2H21.5l-7.42 8.49L23 22h-6.94l-5.39-7.23L3.9 22H.5l7.99-9.16L1 2h7l4.73 6.29L18.146 2z" />
-                  </svg>
                   X（旧Twitter）
                 </a>
               )}
@@ -294,15 +265,6 @@ export default async function BlogPost({
                   rel="noreferrer"
                   className="flex items-center gap-3 text-red-600 font-bold text-xl hover:underline"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="28"
-                    height="28"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.75 15.5v-7L15.5 12l-5.75 3.5z" />
-                  </svg>
                   YouTube チャンネル
                 </a>
               )}
