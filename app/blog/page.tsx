@@ -39,7 +39,7 @@ async function getAllPosts(): Promise<Post[]> {
         mainImage,
         category->{
           title,
-          "slug": slug.current
+          slug
         }
       }
   `);

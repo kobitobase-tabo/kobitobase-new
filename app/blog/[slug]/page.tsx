@@ -127,30 +127,29 @@ async function getPost(slug: string): Promise<Post | null> {
   if (!slug) return null;
 
   return await client.fetch(
-    `
-      *[_type == "post" && slug.current == $slug][0]{
+    `*[_type == "post" && slug.current == $slug][0]{
+      title,
+      slug,
+      mainImage,
+      body,
+      publishedAt,
+      category->{
         title,
-        slug,
-        mainImage,
-        body,
-        publishedAt,
-        category->{
-          title,
-          "slug": slug.current
-        },
-        author->{
-          name,
-          role,
-          bio,
-          image,
-          xUrl,
-          youtubeUrl
-        }
+        slug
+      },
+      author->{
+        name,
+        role,
+        bio,
+        image,
+        xUrl,
+        youtubeUrl
       }
-    `,
-    { slug },
+    }`,
+    { slug }
   );
 }
+
 
 // ========== ページ本体 ==========
 
