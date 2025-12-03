@@ -135,7 +135,7 @@ async function getPost(slug: string): Promise<Post | null> {
       publishedAt,
       category->{
         title,
-        slug
+        "slug": slug.current
       },
       author->{
         name,
