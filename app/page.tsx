@@ -84,13 +84,13 @@ export default async function Home() {
       <div className="flex flex-col md:flex-row gap-12 mb-24">
         <Link
           href="/niwa"
-          className="group block bg-white border border-[#dfe8db] rounded-3xl shadow-md p-10 w-80 hover:shadow-xl transition flex flex-col items-center"
+          className="group block bg-white border border-[#dfe8db] rounded-3xl shadow-md p-12 w-96 hover:shadow-xl transition flex flex-col items-center"
         >
           <Image
             src="/kobitononiwa_logo.png"
             alt="こびとのにわ"
-            width={240}
-            height={240}
+            width={360}
+            height={360}
             className="mb-6 group-hover:scale-105 transition duration-300"
           />
           <p className="text-base text-gray-600 text-center leading-relaxed">
@@ -101,13 +101,13 @@ export default async function Home() {
 
         <Link
           href="/kobitolab"
-          className="group block bg-white border border-[#dfe8db] rounded-3xl shadow-md p-10 w-80 hover:shadow-xl transition flex flex-col items-center"
+          className="group block bg-white border border-[#dfe8db] rounded-3xl shadow-md p-12 w-96 hover:shadow-xl transition flex flex-col items-center"
         >
           <Image
             src="/kobitolab_logo.png"
             alt="KOBITO LAB"
-            width={240}
-            height={240}
+            width={360}
+            height={360}
             className="mb-6 group-hover:scale-105 transition duration-300"
           />
           <p className="text-base text-gray-600 text-center leading-relaxed">
