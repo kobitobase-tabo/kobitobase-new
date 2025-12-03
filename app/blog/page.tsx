@@ -6,13 +6,14 @@ import { useState, useEffect } from "react";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 
-
 // ===============================
-// 🔧 Post 型（any を使わない）
+// 🔧 型定義
 // ===============================
 interface Category {
   title?: string;
-  slug?: string;
+  slug?: {
+    current?: string;
+  } | null;
 }
 
 interface Post {
@@ -48,7 +49,6 @@ async function getAllPosts(): Promise<Post[]> {
 export default function BlogPageWrapper() {
   const [posts, setPosts] = useState<Post[] | null>(null);
 
-  // 初回ロードで記事取得
   useEffect(() => {
     getAllPosts().then((res) => setPosts(res));
   }, []);
@@ -72,10 +72,10 @@ function BlogPage({ posts }: { posts: Post[] }) {
     "all"
   );
 
-  // カテゴリでフィルタ
+  // 🚀 category.slug.current を使ってフィルタ！
   const filteredPosts = posts.filter((post) => {
     if (category === "all") return true;
-    return post.category?.slug === category;
+    return post.category?.slug?.current === category;
   });
 
   return (
@@ -84,7 +84,6 @@ function BlogPage({ posts }: { posts: Post[] }) {
 
       {/* カテゴリ切替ボタン */}
       <div className="flex gap-4 mb-12 flex-wrap justify-center">
-
         <button
           onClick={() => setCategory("all")}
           className={`px-4 py-2 rounded-full border transition ${
@@ -154,11 +153,11 @@ function BlogPage({ posts }: { posts: Post[] }) {
                 </h2>
 
                 <p className="text-sm text-gray-500 mt-2">
-                  {post.category?.slug === "robot"
+                  {post.category?.slug?.current === "robot"
                     ? "🤖 ロボット相撲"
-                    : post.category?.slug === "garden"
+                    : post.category?.slug?.current === "garden"
                     ? "🌿 ガーデニング"
-                    : post.category?.slug === "other"
+                    : post.category?.slug?.current === "other"
                     ? "📁 その他"
                     : "📄 未分類"}
                 </p>
