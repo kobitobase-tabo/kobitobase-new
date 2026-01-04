@@ -20,6 +20,10 @@ const videos = [
     id: "iRTPwwN2jh4",
     title: "Ikedo Mini Sumo Robot V2 ③Start&Stop Test",
   },
+  {
+    id: "1IkFBIiDPOo",
+    title: "i（2025）",
+  },
 ];
 
 export default function LabVideoSlider() {
