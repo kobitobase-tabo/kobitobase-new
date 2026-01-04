@@ -75,7 +75,7 @@ export default function RobotDetail() {
           <div className="pt-[56.25%]" />
           <iframe
             className="absolute top-0 left-0 w-full h-full"
-            src="https://youtu.be/1IkFBIiDPOo"
+            src="https://www.youtube.com/embed/1IkFBIiDPOo"
             title="ロボット i 紹介動画"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
