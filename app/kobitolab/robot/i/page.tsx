@@ -65,7 +65,23 @@ export default function RobotDetail() {
           </tbody>
         </table>
       </div>
+           {/* 紹介動画 */}
+      <section className="w-full max-w-2xl mt-12">
+        <h2 className="text-xl font-bold text-[#4a6b34] mb-4">
+          🎥 動画で見る「i」
+        </h2>
 
+        <div className="relative w-full overflow-hidden rounded-2xl shadow-lg bg-black">
+          <div className="pt-[56.25%]" />
+          <iframe
+            className="absolute top-0 left-0 w-full h-full"
+            src="https://youtu.be/1IkFBIiDPOo"
+            title="ロボット i 紹介動画"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      </section>
     </main>
   );
 }
