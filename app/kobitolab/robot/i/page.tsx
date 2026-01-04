@@ -72,15 +72,18 @@ export default function RobotDetail() {
         </h2>
 
         <div className="relative w-full overflow-hidden rounded-2xl shadow-lg bg-black">
-          <div className="pt-[56.25%]" />
-          <iframe
-            className="absolute top-0 left-0 w-full h-full"
-            src="https://www.youtube.com/embed/1IkFBIiDPOo"
-            title="ロボット i 紹介動画"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
+  <div className="pt-[56.25%]" />
+  <iframe
+    className="absolute top-0 left-0 w-full h-full"
+    src="https://www.youtube-nocookie.com/embed/1IkFBIiDPOo"
+    title="ロボット i 紹介動画"
+    frameBorder="0"
+    loading="lazy"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowFullScreen
+  ></iframe>
+</div>
+
       </section>
     </main>
   );
